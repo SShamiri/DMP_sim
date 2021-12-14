@@ -50,15 +50,34 @@ w_tick_pos = 0.90705
 w_range = c(0.85,0.98)
 
 dat = data.frame(i = 2: N) %>%
-  mutate(u = i/N,
+  mutate(
+    # BC curve
+        u = i/N,
          u_bc = u,
          theta_bc = lambda^2/a^2 * ((1-u)/u)^2,
+        
+         theta_bc_a_plus = lambda^2/a_plus^2 * ((1-u)/u)^2,
+         theta_bc_a_minus = lambda^2/a_minus^2 * ((1-u)/u)^2,
+    # WS and vs curve      
          w = i/N,
          w_ws_vs = w,
          theta_ws = (w-beta*y-(1-beta)*b)/beta/kappa,
          theta_vs = (a/kappa/lambda*(y-w))^2,
+    
          theta_ws_y_plus = (w-beta*y_plus-(1-beta)*b)/beta/kappa,
-         theta_vs_y_plus = (a/kappa/lambda*(y_plus-w))^2
+         theta_vs_y_plus = (a/kappa/lambda*(y_plus-w))^2,
+         theta_ws_y_minus = (w-beta*y_minus-(1-beta)*b)/beta/kappa,
+         theta_vs_y_minus = (a/kappa/lambda*(y_minus-w))^2,
+         theta_vs_a_plus = (a_plus/kappa/lambda*(y-w))^2,
+         theta_vs_a_minus = (a_minus/kappa/lambda*(y-w))^2,
+         theta_ws_kappa_plus = (w-beta*y-(1-beta)*b)/beta/kappa_plus,
+         theta_vs_kappa_plus = (a/kappa_plus/lambda*(y-w))^2,
+         theta_ws_kappa_minus = (w-beta*y-(1-beta)*b)/beta/kappa_minus,
+         theta_vs_kappa_minus = (a/kappa_minus/lambda*(y-w))^2,
+         theta_ws_beta_plus = (w-beta_plus*y-(1-beta_plus)*b)/beta_plus/kappa,
+         theta_ws_beta_minus = (w-beta_minus *y-(1-beta_minus)*b)/beta_minus/kappa,
+         theta_ws_b_plus = (w-beta*y-(1-beta)*b_plus)/beta/kappa,
+         theta_ws_b_minus = (w-beta*y-(1-beta)*b_minus)/beta/kappa
   )
 
 head(dat)

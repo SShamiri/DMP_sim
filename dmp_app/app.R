@@ -16,8 +16,9 @@ ui <- fluidPage(
             radioGroupButtons(
                 inputId = "param",
                 label = "Simualtion",
+                #selected = "",
                 #choices = c("y","A", "κ", "β", "b","λ"),
-                c("y"= "prod", "A" = "a",
+                c("steatdy state" = "ss","y"= "prod", "A" = "a",
                   "κ" = "kappa", "β" = "beta",
                   "b" = "b", "λ" = "lambda"),
                 checkIcon = list(
@@ -27,7 +28,7 @@ ui <- fluidPage(
                                 style = "color: steelblue"))
             ),
             verbatimTextOutput("param"),
-            textOutput("switch"),
+            #textOutput("switch"),
             
             # checkboxGroupButtons(
             #     inputId = "param", label = "Simulation :", 
@@ -50,16 +51,16 @@ server <- function(input, output) {
     
     output$param <- renderPrint({ input$param })
     
-    param <- switch(input$parm,
-                   prod = y_plaus,
-                   a = a_plus,
-                   kappa = kappa_plus,
-                   beta = beta_plus,
-                   b = b_plus,
-                   lambda = lambda_plus
-                   )
-
-    output$switch <- renderText({ paste0("use",param) })
+    # param <- switch(input$parm,
+    #                prod = y_plaus,
+    #                a = a_plus,
+    #                kappa = kappa_plus,
+    #                beta = beta_plus,
+    #                b = b_plus,
+    #                lambda = lambda_plus
+    #                )
+    # 
+    # output$switch <- renderText({ paste0("use",param) })
     
     output$bc_plot <- renderEcharts4r({
         
@@ -115,6 +116,18 @@ server <- function(input, output) {
                 )
             )  %>% 
             e_tooltip()
+    })
+    
+    observeEvent(input$param, {
+        w_range <- c(0.85,0.98)
+        
+        if(input$param == 'prod'){
+            
+        echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
+            e_line(theta_ws_y_plus) %>%
+            e_line(theta_vs_y_plus) %>%   
+            e_execute()
+        }
     })
 }
 
