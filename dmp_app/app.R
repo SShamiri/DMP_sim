@@ -62,58 +62,100 @@ server <- function(input, output) {
     # 
     # output$switch <- renderText({ paste0("use",param) })
     
+    # bc plot
     output$bc_plot <- renderEcharts4r({
         
         u_range <- c(0.08,0.16)
         
         dat %>% filter(between(u,u_range[1], u_range[2])) %>%
             e_chart(u_bc) %>% 
-            e_line(theta_bc) %>%
+            e_line(theta_bc, lineStyle = list(type = "solid", color = "#3D3DDD"),symbol= 'none') %>%
             e_x_axis(min = 0.06) %>% 
+            e_hide_grid_lines() %>% 
             e_mark_p(
                 type = "line",
+                serie_index = 1,
                 data = list(
                     list(xAxis = 0.1, yAxis = 2.3),
                     list(xAxis = 0.1, yAxis = 0,
                          value = "Uss")
                 ),
-                #lineStyle = list(type = "solid", color = "yellow")
+                lineStyle = list(type = "solid", color = "gray")
             ) %>% 
             e_mark_p(
                 type = "line",
+                serie_index = 1,
                 data = list(
                     list(xAxis = 0.1, yAxis = 2.3),
                     list(xAxis = 0.06, yAxis = 2.3,
                          value = "θss")
-                )
+                ),
+                lineStyle = list(type = "solid", color = "gray")
             ) %>% 
         e_tooltip()
     })
     
+    observeEvent(input$param, {
+        u_range <- c(0.08,0.16)
+
+        if(grepl("ss|kappa|b|beta|y",input$param)){
+            echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+                e_remove_serie("theta_bc_a_plus") %>%
+                e_remove_serie("theta_bc_a_minus") %>%
+                e_remove_serie("theta_bc_lambda_plus") %>%
+                e_remove_serie("theta_bc_lambda_minus") %>%
+                e_execute()
+        }
+
+        if(input$param == 'a'){
+            echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+                e_line(theta_bc_a_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none') %>%
+                e_remove_serie("theta_bc_a_minus") %>%
+                e_remove_serie("theta_bc_lambda_plus") %>%
+                e_remove_serie("theta_bc_lambda_minus") %>%
+                e_execute()
+        }
+
+        if(input$param == 'lambda'){
+            echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+                e_line(theta_bc_lambda_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none') %>%
+                e_remove_serie("theta_bc_a_plus") %>%
+                e_remove_serie("theta_bc_a_minus") %>%
+                e_remove_serie("theta_bc_lambda_minus") %>%
+                e_execute()
+        }
+    })
+    
+    # ws & vs plot
     output$ws_vs_plot <- renderEcharts4r({
         
         w_range <- c(0.85,0.98)
         
         dat %>% filter(between(w,w_range[1], w_range[2])) %>%
             e_chart(w) %>% 
-            e_line(theta_ws) %>%
-            e_line(theta_vs) %>% 
+            e_line(theta_ws, lineStyle = list(type = "solid", color = "#C3F7F7"),symbol= 'none') %>%
+            e_line(theta_vs, lineStyle = list(type = "solid", color = "#2A29A6"),symbol= 'none') %>% 
+            e_hide_grid_lines() %>% 
             e_x_axis(min = 0.82) %>% 
             e_mark_p(
                 type = "line",
+                serie_index = 1,
                 data = list(
                     list(xAxis = 0.9065, yAxis = 1.64256),
                     list(xAxis = 0.9065, yAxis = 0,
                          value = "Wss")
-                )
+                ),
+                lineStyle = list(type = "solid", color = "gray")
             )  %>% 
             e_mark_p(
                 type = "line",
+                serie_index = 1,
                 data = list(
                     list(xAxis = 0.9065, yAxis = 1.64256),
                     list(xAxis = 0.82, yAxis =  1.64256,
                          value = "θss")
-                )
+                ),
+                lineStyle = list(type = "solid", color = "gray")
             )  %>% 
             e_tooltip()
     })
@@ -121,12 +163,157 @@ server <- function(input, output) {
     observeEvent(input$param, {
         w_range <- c(0.85,0.98)
         
+        if(input$param == 'ss'){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
+                e_remove_serie("theta_ws_y_plus") %>%
+                e_remove_serie("theta_vs_y_plus") %>%  
+                
+                e_remove_serie("theta_vs_a_minus") %>%
+                e_remove_serie("theta_ws_beta_plus") %>%
+                e_remove_serie("theta_bc_a_plus") %>%
+                e_remove_serie("theta_ws_kappa_plus") %>%
+                e_remove_serie("theta_ws_beta_minus") %>%
+                e_remove_serie("theta_ws_y_minus") %>%
+                e_remove_serie("theta_vs_kappa_plus") %>%
+                e_remove_serie("theta_ws_b_plus") %>%
+                e_remove_serie("theta_vs_y_minus") %>%
+                e_remove_serie("theta_ws_kappa_minus") %>%
+                e_remove_serie("theta_ws_b_minus") %>%
+                e_remove_serie("theta_vs_a_plus") %>%
+                e_remove_serie("theta_vs_kappa_minus") %>%
+                e_remove_serie("theta_vs_lambda_plus") %>%
+                e_remove_serie("theta_vs_lambda_minus") %>%
+                e_execute()
+        }
+        
         if(input$param == 'prod'){
-            
         echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
             e_line(theta_ws_y_plus) %>%
-            e_line(theta_vs_y_plus) %>%   
+            e_line(theta_vs_y_plus) %>% 
+            
+            e_remove_serie("theta_vs_a_minus") %>%
+            e_remove_serie("theta_ws_beta_plus") %>%
+            e_remove_serie("theta_bc_a_plus") %>%
+            e_remove_serie("theta_ws_kappa_plus") %>%
+            e_remove_serie("theta_ws_beta_minus") %>%
+            e_remove_serie("theta_ws_y_minus") %>%
+            e_remove_serie("theta_vs_kappa_plus") %>%
+            e_remove_serie("theta_ws_b_plus") %>%
+            e_remove_serie("theta_vs_y_minus") %>%
+            e_remove_serie("theta_ws_kappa_minus") %>%
+            e_remove_serie("theta_ws_b_minus") %>%
+            e_remove_serie("theta_vs_a_plus") %>%
+            e_remove_serie("theta_vs_kappa_minus") %>%
+            e_remove_serie("theta_vs_lambda_plus") %>%
+            e_remove_serie("theta_vs_lambda_minus") %>%
             e_execute()
+        }
+        
+        if(input$param == 'a'){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
+                e_line(theta_vs_a_plus) %>%  
+                e_remove_serie("theta_ws_y_plus") %>%
+                e_remove_serie("theta_vs_y_plus") %>%
+                
+                e_remove_serie("theta_vs_a_minus") %>%
+                e_remove_serie("theta_ws_beta_plus") %>%
+                e_remove_serie("theta_ws_kappa_plus") %>%
+                e_remove_serie("theta_ws_beta_minus") %>%
+                e_remove_serie("theta_ws_y_minus") %>%
+                e_remove_serie("theta_vs_kappa_plus") %>%
+                e_remove_serie("theta_ws_b_plus") %>%
+                e_remove_serie("theta_vs_y_minus") %>%
+                e_remove_serie("theta_ws_kappa_minus") %>%
+                e_remove_serie("theta_ws_b_minus") %>%
+                e_remove_serie("theta_vs_a_plus") %>%
+                e_remove_serie("theta_vs_kappa_minus") %>%
+                e_remove_serie("theta_vs_lambda_plus") %>%
+                e_remove_serie("theta_vs_lambda_minus") %>%
+                e_execute()
+        }
+        
+        if(input$param == 'kappa'){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
+                e_line(theta_ws_kappa_plus) %>% 
+                e_line(theta_vs_kappa_plus) %>% 
+                e_remove_serie("theta_ws_y_plus") %>%
+                e_remove_serie("theta_vs_y_plus") %>%
+                e_remove_serie("theta_ws_y_minus") %>%
+                e_remove_serie("theta_vs_y_minus") %>%
+                e_remove_serie("theta_vs_a_plus") %>%
+                e_remove_serie("theta_vs_a_minus") %>%
+                e_remove_serie("theta_ws_kappa_minus") %>%
+                e_remove_serie("theta_vs_kappa_minus") %>%
+                e_remove_serie("theta_ws_beta_plus") %>%
+                e_remove_serie("theta_ws_beta_minus") %>%
+                e_remove_serie("theta_ws_b_plus") %>%
+                e_remove_serie("theta_ws_b_minus") %>%
+                e_remove_serie("theta_vs_lambda_plus") %>%
+                e_remove_serie("theta_vs_lambda_minus") %>%
+                e_execute()
+        }
+        
+        if(input$param == 'beta'){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
+                e_line(theta_ws_beta_plus) %>%  
+                e_remove_serie("theta_ws_y_plus") %>%
+                e_remove_serie("theta_vs_y_plus") %>%
+                e_remove_serie("theta_ws_y_minus") %>%
+                e_remove_serie("theta_vs_y_minus") %>%
+                e_remove_serie("theta_vs_a_plus") %>%
+                e_remove_serie("theta_vs_a_minus") %>%
+                e_remove_serie("theta_ws_kappa_plus") %>%
+                e_remove_serie("theta_vs_kappa_plus") %>%
+                e_remove_serie("theta_ws_kappa_minus") %>%
+                e_remove_serie("theta_vs_kappa_minus") %>%
+                e_remove_serie("theta_ws_beta_plus") %>%
+                e_remove_serie("theta_ws_beta_minus") %>%
+                e_remove_serie("theta_ws_b_minus") %>%
+                e_remove_serie("theta_vs_lambda_plus") %>%
+                e_remove_serie("theta_vs_lambda_minus") %>%
+                e_execute()
+        }
+        
+        if(input$param == 'b'){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
+                e_line(theta_ws_b_plus) %>%
+                e_remove_serie("theta_ws_y_plus") %>%
+                e_remove_serie("theta_vs_y_plus") %>%
+                e_remove_serie("theta_ws_y_minus") %>%
+                e_remove_serie("theta_vs_y_minus") %>%
+                e_remove_serie("theta_vs_a_plus") %>%
+                e_remove_serie("theta_vs_a_minus") %>%
+                e_remove_serie("theta_ws_kappa_plus") %>%
+                e_remove_serie("theta_vs_kappa_plus") %>%
+                e_remove_serie("theta_ws_kappa_minus") %>%
+                e_remove_serie("theta_vs_kappa_minus") %>%
+                e_remove_serie("theta_ws_beta_plus") %>%
+                e_remove_serie("theta_ws_beta_minus") %>%
+                e_remove_serie("theta_ws_b_minus") %>%
+                e_remove_serie("theta_vs_lambda_plus") %>%
+                e_remove_serie("theta_vs_lambda_minus") %>%
+                e_execute()
+        }
+        
+        if(input$param == 'lambda'){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
+                e_line(theta_vs_lambda_plus) %>% 
+                e_remove_serie("theta_ws_y_plus") %>%
+                e_remove_serie("theta_vs_y_plus") %>%
+                e_remove_serie("theta_ws_y_minus") %>%
+                e_remove_serie("theta_vs_y_minus") %>%
+                e_remove_serie("theta_vs_a_plus") %>%
+                e_remove_serie("theta_vs_a_minus") %>%
+                e_remove_serie("theta_ws_kappa_plus") %>%
+                e_remove_serie("theta_vs_kappa_plus") %>%
+                e_remove_serie("theta_ws_kappa_minus") %>%
+                e_remove_serie("theta_vs_kappa_minus") %>%
+                e_remove_serie("theta_ws_beta_plus") %>%
+                e_remove_serie("theta_ws_beta_minus") %>%
+                e_remove_serie("theta_ws_b_plus") %>%
+                e_remove_serie("theta_ws_b_minus") %>%
+                e_remove_serie("theta_vs_lambda_minus") %>%
+                e_execute()
         }
     })
 }

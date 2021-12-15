@@ -5,17 +5,17 @@ library(echarts4r)
 N = 500
 
 # Initial parameter values
-kappa= 0.43
-beta= 0.2
-lambda= 0.102
-a= 0.6
-b= 0.71
-y= 1;
+kappa= 0.43 # cost to advertise a job vacancy
+beta= 0.2 # workers' degree of bargaining power in wage negotiations
+lambda= 0.102 # reflects the exogenous separation rate
+a= 0.6 # efficiency of the matching process
+b= 0.71 # the value to the worker of not being employed and reflects, among other things, the amount of unemployment benefits provided by government policy
+y= 1 # output of the worker
 
 # Initial steady state
-theta_ss= 1.61685
-u_ss= 0.11793
-w_ss= 0.90705
+theta_ss= 1.61685 #market tightness from the perspective of firms making hiring decisions
+u_ss= 0.11793 # unemployed rate
+w_ss= 0.90705 # Real wage
 
 # Parameter values after change
 y_plus= 1+.05
@@ -58,6 +58,9 @@ dat = data.frame(i = 2: N) %>%
         
          theta_bc_a_plus = lambda^2/a_plus^2 * ((1-u)/u)^2,
          theta_bc_a_minus = lambda^2/a_minus^2 * ((1-u)/u)^2,
+        
+        theta_bc_lambda_plus = lambda_plus^2/a^2 * ((1-u)/u)^2,
+        theta_bc_lambda_minus = lambda_minus^2/a^2 * ((1-u)/u)^2,
     # WS and vs curve      
          w = i/N,
          w_ws_vs = w,
@@ -68,16 +71,23 @@ dat = data.frame(i = 2: N) %>%
          theta_vs_y_plus = (a/kappa/lambda*(y_plus-w))^2,
          theta_ws_y_minus = (w-beta*y_minus-(1-beta)*b)/beta/kappa,
          theta_vs_y_minus = (a/kappa/lambda*(y_minus-w))^2,
+    
          theta_vs_a_plus = (a_plus/kappa/lambda*(y-w))^2,
          theta_vs_a_minus = (a_minus/kappa/lambda*(y-w))^2,
+    
          theta_ws_kappa_plus = (w-beta*y-(1-beta)*b)/beta/kappa_plus,
          theta_vs_kappa_plus = (a/kappa_plus/lambda*(y-w))^2,
          theta_ws_kappa_minus = (w-beta*y-(1-beta)*b)/beta/kappa_minus,
          theta_vs_kappa_minus = (a/kappa_minus/lambda*(y-w))^2,
+    
          theta_ws_beta_plus = (w-beta_plus*y-(1-beta_plus)*b)/beta_plus/kappa,
          theta_ws_beta_minus = (w-beta_minus *y-(1-beta_minus)*b)/beta_minus/kappa,
+    
          theta_ws_b_plus = (w-beta*y-(1-beta)*b_plus)/beta/kappa,
-         theta_ws_b_minus = (w-beta*y-(1-beta)*b_minus)/beta/kappa
+         theta_ws_b_minus = (w-beta*y-(1-beta)*b_minus)/beta/kappa,
+    
+         theta_vs_lambda_plus = (a/kappa/lambda_plus*(y-w))^2,
+         theta_vs_lambda_minus = (a/kappa/lambda_minus*(y-w))^2
   )
 
 head(dat)
