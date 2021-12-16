@@ -7,14 +7,14 @@ library(shinyWidgets)
 ui <- fluidPage(
 
     # Application title
-    titlePanel("DMP model"),
+    titlePanel("DMP model Simualtion"),
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         
         sidebarPanel(
             radioGroupButtons(
-                inputId = "param",
+                inputId = "param_increase",
                 label = "Simualtion",
                 #selected = "",
                 #choices = c("y","A", "κ", "β", "b","λ"),
@@ -27,21 +27,27 @@ ui <- fluidPage(
                     no = tags$i(class = "fa fa-square-o",
                                 style = "color: steelblue"))
             ),
-            verbatimTextOutput("param"),
-            #textOutput("switch"),
-            
-            # checkboxGroupButtons(
-            #     inputId = "param", label = "Simulation :", 
-            #     choices = c("Choice A", "Choice B", " Choice C", "Choice D"), 
-            #     justified = TRUE, status = "primary",
-            #     checkIcon = list(yes = icon("ok", lib = "glyphicon"), no = icon("remove", lib = "glyphicon"))
-            # )
+            #verbatimTextOutput("param"),
+            radioGroupButtons(
+                inputId = "param_decline",
+                label = "Simualtion",
+                #selected = "",
+                #choices = c("y","A", "κ", "β", "b","λ"),
+                c("steatdy state" = "ss","y"= "prod", "A" = "a",
+                  "κ" = "kappa", "β" = "beta",
+                  "b" = "b", "λ" = "lambda"),
+                checkIcon = list(
+                    yes = tags$i(class = "fa fa-check-square",
+                                 style = "color: steelblue"),
+                    no = tags$i(class = "fa fa-square-o",
+                                style = "color: steelblue"))
+            ),
         ),
-
-        # Show a plot of the generated distribution
         mainPanel(
-            echarts4rOutput("bc_plot"),
-            echarts4rOutput("ws_vs_plot")
+            fluidRow(
+                column(6, echarts4rOutput("bc_plot")),
+                column(6, echarts4rOutput("ws_vs_plot"))
+            )
         )
     )
 )
@@ -49,18 +55,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
     
-    output$param <- renderPrint({ input$param })
-    
-    # param <- switch(input$parm,
-    #                prod = y_plaus,
-    #                a = a_plus,
-    #                kappa = kappa_plus,
-    #                beta = beta_plus,
-    #                b = b_plus,
-    #                lambda = lambda_plus
-    #                )
-    # 
-    # output$switch <- renderText({ paste0("use",param) })
+   # output$param <- renderPrint({ input$param_increase })
     
     # bc plot
     output$bc_plot <- renderEcharts4r({
@@ -76,8 +71,8 @@ server <- function(input, output) {
                 type = "line",
                 serie_index = 1,
                 data = list(
-                    list(xAxis = 0.1, yAxis = 2.3),
-                    list(xAxis = 0.1, yAxis = 0,
+                    list(xAxis = 0.1155, yAxis = 1.64256),
+                    list(xAxis = 0.1155, yAxis = 0,
                          value = "Uss")
                 ),
                 lineStyle = list(type = "solid", color = "gray")
@@ -86,8 +81,8 @@ server <- function(input, output) {
                 type = "line",
                 serie_index = 1,
                 data = list(
-                    list(xAxis = 0.1, yAxis = 2.3),
-                    list(xAxis = 0.06, yAxis = 2.3,
+                    list(xAxis = 0.1155, yAxis = 1.64256),
+                    list(xAxis = 0.06, yAxis = 1.64256,
                          value = "θss")
                 ),
                 lineStyle = list(type = "solid", color = "gray")
@@ -95,10 +90,10 @@ server <- function(input, output) {
         e_tooltip()
     })
     
-    observeEvent(input$param, {
+    observeEvent(input$param_increase, {
         u_range <- c(0.08,0.16)
 
-        if(grepl("ss|kappa|b|beta|y",input$param)){
+        if(grepl("ss|kappa|b|beta|y",input$param_increase)){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
                 e_remove_serie("theta_bc_a_plus") %>%
                 e_remove_serie("theta_bc_a_minus") %>%
@@ -107,7 +102,7 @@ server <- function(input, output) {
                 e_execute()
         }
 
-        if(input$param == 'a'){
+        if(input$param_increase == 'a'){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
                 e_line(theta_bc_a_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none') %>%
                 e_remove_serie("theta_bc_a_minus") %>%
@@ -116,7 +111,7 @@ server <- function(input, output) {
                 e_execute()
         }
 
-        if(input$param == 'lambda'){
+        if(input$param_increase == 'lambda'){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
                 e_line(theta_bc_lambda_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none') %>%
                 e_remove_serie("theta_bc_a_plus") %>%
@@ -133,8 +128,8 @@ server <- function(input, output) {
         
         dat %>% filter(between(w,w_range[1], w_range[2])) %>%
             e_chart(w) %>% 
-            e_line(theta_ws, lineStyle = list(type = "solid", color = "#C3F7F7"),symbol= 'none') %>%
-            e_line(theta_vs, lineStyle = list(type = "solid", color = "#2A29A6"),symbol= 'none') %>% 
+            e_line(theta_ws, lineStyle = list(type = "solid", color = "#8d89f5"),symbol= 'none') %>%
+            e_line(theta_vs, lineStyle = list(type = "solid", color = "#B80000"),symbol= 'none') %>% 
             e_hide_grid_lines() %>% 
             e_x_axis(min = 0.82) %>% 
             e_mark_p(
@@ -160,14 +155,13 @@ server <- function(input, output) {
             e_tooltip()
     })
     
-    observeEvent(input$param, {
+    observeEvent(input$param_increase, {
         w_range <- c(0.85,0.98)
         
-        if(input$param == 'ss'){
+        if(input$param_increase == 'ss'){
             echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
                 e_remove_serie("theta_ws_y_plus") %>%
                 e_remove_serie("theta_vs_y_plus") %>%  
-                
                 e_remove_serie("theta_vs_a_minus") %>%
                 e_remove_serie("theta_ws_beta_plus") %>%
                 e_remove_serie("theta_bc_a_plus") %>%
@@ -186,11 +180,10 @@ server <- function(input, output) {
                 e_execute()
         }
         
-        if(input$param == 'prod'){
+        if(input$param_increase == 'prod'){
         echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
             e_line(theta_ws_y_plus) %>%
             e_line(theta_vs_y_plus) %>% 
-            
             e_remove_serie("theta_vs_a_minus") %>%
             e_remove_serie("theta_ws_beta_plus") %>%
             e_remove_serie("theta_bc_a_plus") %>%
@@ -209,12 +202,11 @@ server <- function(input, output) {
             e_execute()
         }
         
-        if(input$param == 'a'){
+        if(input$param_increase == 'a'){
             echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
                 e_line(theta_vs_a_plus) %>%  
                 e_remove_serie("theta_ws_y_plus") %>%
                 e_remove_serie("theta_vs_y_plus") %>%
-                
                 e_remove_serie("theta_vs_a_minus") %>%
                 e_remove_serie("theta_ws_beta_plus") %>%
                 e_remove_serie("theta_ws_kappa_plus") %>%
@@ -232,7 +224,7 @@ server <- function(input, output) {
                 e_execute()
         }
         
-        if(input$param == 'kappa'){
+        if(input$param_increase == 'kappa'){
             echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
                 e_line(theta_ws_kappa_plus) %>% 
                 e_line(theta_vs_kappa_plus) %>% 
@@ -253,7 +245,7 @@ server <- function(input, output) {
                 e_execute()
         }
         
-        if(input$param == 'beta'){
+        if(input$param_increase == 'beta'){
             echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
                 e_line(theta_ws_beta_plus) %>%  
                 e_remove_serie("theta_ws_y_plus") %>%
@@ -274,7 +266,7 @@ server <- function(input, output) {
                 e_execute()
         }
         
-        if(input$param == 'b'){
+        if(input$param_increase == 'b'){
             echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
                 e_line(theta_ws_b_plus) %>%
                 e_remove_serie("theta_ws_y_plus") %>%
@@ -295,7 +287,7 @@ server <- function(input, output) {
                 e_execute()
         }
         
-        if(input$param == 'lambda'){
+        if(input$param_increase == 'lambda'){
             echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
                 e_line(theta_vs_lambda_plus) %>% 
                 e_remove_serie("theta_ws_y_plus") %>%

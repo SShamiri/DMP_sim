@@ -19,8 +19,8 @@ dat %>% filter(between(u,u_range[1], u_range[2])) %>%
   e_mark_p(
     type = "line",
     data = list(
-      list(xAxis = 0.1, yAxis = 2.3),
-      list(xAxis = 0.1, yAxis = 0,
+      list(xAxis = 0.1155, yAxis = 1.64256),
+      list(xAxis = 0.1155, yAxis = 0,
            value = "Uss")
     )
    
@@ -29,11 +29,11 @@ dat %>% filter(between(u,u_range[1], u_range[2])) %>%
     type = "line",
     serie_index = 2,
     data = list(
-      list(xAxis = 0.1, yAxis = 2.3),
-      list(xAxis = 0.06, yAxis = 2.3,
+      list(xAxis = 0.1155, yAxis = 1.64256),
+      list(xAxis = 0.06, yAxis = 1.64256,
            value = "θss")
     ),
-    lineStyle = list(type = "solid", color = "yellow")
+    lineStyle = list(type = "solid")
   ) 
 
 
