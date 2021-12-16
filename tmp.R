@@ -40,25 +40,30 @@ dat %>% filter(between(u,u_range[1], u_range[2])) %>%
 
 dat %>% filter(between(w,w_range[1], w_range[2])) %>%
   e_chart(w) %>% 
-  e_line(theta_ws) %>%
-  e_line(theta_vs) %>% 
-  e_line(theta_ws_y_plus) %>%
-  e_line(theta_vs_y_plus) %>% 
+  e_line(theta_ws, lineStyle = list(type = "solid", color = "#8d89f5"),symbol= 'none',name = 'Wage') %>%
+  e_line(theta_vs, lineStyle = list(type = "solid", color = "#B80000"),symbol= 'none', name = 'Vacancy') %>% 
+  e_line(theta_ws_y_plus, name = 'Wage', lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
+  e_line(theta_vs_y_plus, name = 'Vacancy', lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>% 
+  e_hide_grid_lines() %>% 
   e_x_axis(min = 0.82) %>% 
   e_mark_p(
     type = "line",
+    serie_index = 1,
     data = list(
       list(xAxis = 0.9065, yAxis = 1.64256),
       list(xAxis = 0.9065, yAxis = 0,
            value = "Wss")
-    )
+    ),
+    lineStyle = list(type = "solid", color = "gray")
   )  %>% 
   e_mark_p(
     type = "line",
+    serie_index = 1,
     data = list(
       list(xAxis = 0.9065, yAxis = 1.64256),
       list(xAxis = 0.82, yAxis =  1.64256,
            value = "θss")
-    )
+    ),
+    lineStyle = list(type = "solid", color = "gray")
   )  %>% 
   e_tooltip()
