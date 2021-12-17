@@ -18,17 +18,17 @@ ui <- dashboardPage(
                            onStatus = "success", 
                            offStatus = "danger"
                        ),
-                       radioGroupButtons(
+                       awesomeRadio(
                            inputId = "param_increase",
                            label = "Simualtion",
-                           c("steatdy state" = "ss","y"= "prod", "A" = "a",
-                             "κ" = "kappa", "β" = "beta",
-                             "b" = "b", "λ" = "lambda"),
-                           checkIcon = list(
-                               yes = tags$i(class = "fa fa-check-square",
-                                            style = "color: steelblue"),
-                               no = tags$i(class = "fa fa-square-o",
-                                           style = "color: steelblue"))
+                           c("steatdy state" = "ss",
+                             "output of the worker (y)"= "prod", 
+                             "efficiency of the matching process (A)" = "a",
+                             "cost to advertise a job vacancy (κ)" = "kappa", 
+                             "workers' degree of bargaining power in wage negotiations (β)" = "beta",
+                             "the value to the worker of not being employed i.e. unemployment benefits (b)" = "b", 
+                             "reflects the exogenous separation rate (λ)" = "lambda"),
+                           checkbox = TRUE
                        )
                        
                    )
@@ -83,7 +83,16 @@ server <- function(input, output) {
         dat %>% filter(between(u,u_range[1], u_range[2])) %>%
             e_chart(u_bc) %>% 
             e_line(theta_bc, lineStyle = list(type = "solid", color = "#3D3DDD"),symbol= 'none', name = 'BC') %>%
-            e_x_axis(min = 0.06) %>% 
+            e_x_axis(min = 0.06, name = "Unemployment rate", 
+                     nameLocation= 'middle', 
+                     axisLabel = list(color = 'white'), 
+                     nameGap = 25) %>%
+            e_y_axis(max = 6,
+                    name = "market tightness (θ)", 
+                     nameLocation= 'middle', 
+                     #axisLine = F, 
+                     #axisLabel = list(color = 'white'), 
+                     nameGap = 25) %>%
             e_hide_grid_lines() %>% 
             e_mark_p(
                 type = "line",
@@ -113,16 +122,16 @@ server <- function(input, output) {
         
         if(grepl("ss|kappa|b|beta|y",input$param_increase)){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
-                e_remove_serie("theta_bc_a_plus") %>%
+                e_remove_serie("BC'") %>%
                 e_remove_serie("theta_bc_a_minus") %>%
-                e_remove_serie("theta_bc_lambda_plus") %>%
+               # e_remove_serie("theta_bc_lambda_plus") %>%
                 e_remove_serie("theta_bc_lambda_minus") %>%
                 e_execute()
         }
         
         if(input$param_increase == 'a'){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
-                e_line(theta_bc_a_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none', name = 'BC+') %>%
+                e_line(theta_bc_a_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none', name = "BC'") %>%
                 e_remove_serie("theta_bc_a_minus") %>%
                 e_remove_serie("theta_bc_lambda_plus") %>%
                 e_remove_serie("theta_bc_lambda_minus") %>%
@@ -131,7 +140,7 @@ server <- function(input, output) {
         
         if(input$param_increase == 'lambda'){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
-                e_line(theta_bc_lambda_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none', name = 'BC+') %>%
+                e_line(theta_bc_lambda_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none', name = "BC'") %>%
                 e_remove_serie("theta_bc_a_plus") %>%
                 e_remove_serie("theta_bc_a_minus") %>%
                 e_remove_serie("theta_bc_lambda_minus") %>%
@@ -150,6 +159,7 @@ server <- function(input, output) {
             e_line(theta_vs, lineStyle = list(type = "solid", color = "#B80000"),symbol= 'none', name = 'Vacancy') %>% 
             e_hide_grid_lines() %>% 
             e_x_axis(min = 0.82) %>% 
+            e_y_axis(max = 6) %>% 
             e_mark_p(
                 type = "line",
                 serie_index = 1,
@@ -178,8 +188,8 @@ server <- function(input, output) {
         
         if(input$param_increase == 'ss'){
             echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
-                e_remove_serie("theta_ws_y_plus") %>%
-                e_remove_serie("theta_vs_y_plus") %>%  
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%  
                 e_remove_serie("theta_vs_a_minus") %>%
                 e_remove_serie("theta_ws_beta_plus") %>%
                 e_remove_serie("theta_bc_a_plus") %>%
@@ -200,8 +210,8 @@ server <- function(input, output) {
         
         if(input$param_increase == 'prod'){
             echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
-                e_line(theta_ws_y_plus, name = 'Wage', lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
-                e_line(theta_vs_y_plus, name = 'Vacancy', lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%  
+                e_line(theta_ws_y_plus, name = "Wage'", lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
+                e_line(theta_vs_y_plus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%  
                 e_remove_serie("theta_vs_a_minus") %>%
                 e_remove_serie("theta_ws_beta_plus") %>%
                 e_remove_serie("theta_bc_a_plus") %>%
