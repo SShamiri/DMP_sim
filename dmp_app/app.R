@@ -10,7 +10,7 @@ ui <- dashboardPage(
                        collapsible = FALSE, collapsed = FALSE,
                        p("Direction:"),
                        switchInput(
-                           inputId = "swt",
+                           inputId = "switch",
                            label = "",
                            value = TRUE,
                            onLabel = "Increase",
@@ -19,19 +19,21 @@ ui <- dashboardPage(
                            offStatus = "danger"
                        ),
                        awesomeRadio(
-                           inputId = "param_increase",
+                           inputId = "param",
                            label = "Simualtion",
                            c("steatdy state" = "ss",
                              "output of the worker (y)"= "prod", 
                              "efficiency of the matching process (A)" = "a",
                              "cost to advertise a job vacancy (κ)" = "kappa", 
                              "workers' degree of bargaining power in wage negotiations (β)" = "beta",
-                             "the value to the worker of not being employed i.e. unemployment benefits (b)" = "b", 
+                             "unemployment benefits (b)" = "b", 
                              "reflects the exogenous separation rate (λ)" = "lambda"),
                            checkbox = TRUE
                        )
                        
-                   )
+                   ),
+                   verbatimTextOutput("param")
+                   
             ),
             column(width = 8,
                    fluidRow(
@@ -73,7 +75,7 @@ ui <- dashboardPage(
 
 server <- function(input, output) {
     
-    # output$param <- renderPrint({ input$param_increase })
+     #output$param <- renderPrint({ input$param_increase })
     
     # bc plot
     output$bc_plot <- renderEcharts4r({
@@ -117,33 +119,46 @@ server <- function(input, output) {
             e_tooltip()
     })
     
-    observeEvent(input$param_increase, {
+    toListen <- reactive({
+        list(input$param,input$switch)
+    })
+    
+    output$param <- renderPrint({toListen() })
+
+    observeEvent(toListen(), {
         u_range <- c(0.08,0.16)
-        
-        if(grepl("ss|kappa|b|beta|y",input$param_increase)){
+
+        if(grepl("ss|kappa|b|beta|y",input$param)){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
                 e_remove_serie("BC'") %>%
-                e_remove_serie("theta_bc_a_minus") %>%
-               # e_remove_serie("theta_bc_lambda_plus") %>%
-                e_remove_serie("theta_bc_lambda_minus") %>%
                 e_execute()
         }
-        
-        if(input$param_increase == 'a'){
+
+        if(input$param == 'a' && input$switch == TRUE){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
                 e_line(theta_bc_a_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none', name = "BC'") %>%
-                e_remove_serie("theta_bc_a_minus") %>%
-                e_remove_serie("theta_bc_lambda_plus") %>%
-                e_remove_serie("theta_bc_lambda_minus") %>%
+                e_remove_serie("BC'") %>%
                 e_execute()
         }
-        
-        if(input$param_increase == 'lambda'){
+
+        if(input$param == 'a' && input$switch == FALSE){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+                e_remove_serie("BC'") %>%
+                e_line(theta_bc_a_minus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none', name = "BC'") %>%
+                e_execute()
+        }
+
+        if(input$param == 'lambda' && input$switch == TRUE){
+            echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+                e_remove_serie("BC'") %>%
                 e_line(theta_bc_lambda_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none', name = "BC'") %>%
-                e_remove_serie("theta_bc_a_plus") %>%
-                e_remove_serie("theta_bc_a_minus") %>%
-                e_remove_serie("theta_bc_lambda_minus") %>%
+                e_execute()
+        }
+
+        if(input$param == 'lambda' && input$switch == FALSE){
+            echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+                e_remove_serie("BC'") %>%
+                e_line(theta_bc_lambda_minus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none', name = "BC'") %>%
                 e_execute()
         }
     })
@@ -183,159 +198,123 @@ server <- function(input, output) {
             e_tooltip()
     })
     
-    observeEvent(input$param_increase, {
+    observeEvent(toListen(), {
         w_range <- c(0.85,0.98)
-        
-        if(input$param_increase == 'ss'){
-            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
+
+        if(input$param == 'ss'){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
                 e_remove_serie("Wage'") %>%
-                e_remove_serie("Vacancy'") %>%  
-                e_remove_serie("theta_vs_a_minus") %>%
-                e_remove_serie("theta_ws_beta_plus") %>%
-                e_remove_serie("theta_bc_a_plus") %>%
-                e_remove_serie("theta_ws_kappa_plus") %>%
-                e_remove_serie("theta_ws_beta_minus") %>%
-                e_remove_serie("theta_ws_y_minus") %>%
-                e_remove_serie("theta_vs_kappa_plus") %>%
-                e_remove_serie("theta_ws_b_plus") %>%
-                e_remove_serie("theta_vs_y_minus") %>%
-                e_remove_serie("theta_ws_kappa_minus") %>%
-                e_remove_serie("theta_ws_b_minus") %>%
-                e_remove_serie("theta_vs_a_plus") %>%
-                e_remove_serie("theta_vs_kappa_minus") %>%
-                e_remove_serie("theta_vs_lambda_plus") %>%
-                e_remove_serie("theta_vs_lambda_minus") %>%
+                e_remove_serie("Vacancy'") %>%
                 e_execute()
         }
-        
-        if(input$param_increase == 'prod'){
-            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
+
+        # if(input$param == 'ss' && input$switch == FALSE ){
+        #     echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+        #         e_remove_serie("Wage'") %>%
+        #         e_remove_serie("Vacancy'") %>%
+        #         e_execute()
+        # }
+
+        if(input$param == 'prod' && input$switch == TRUE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
                 e_line(theta_ws_y_plus, name = "Wage'", lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
-                e_line(theta_vs_y_plus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%  
-                e_remove_serie("theta_vs_a_minus") %>%
-                e_remove_serie("theta_ws_beta_plus") %>%
-                e_remove_serie("theta_bc_a_plus") %>%
-                e_remove_serie("theta_ws_kappa_plus") %>%
-                e_remove_serie("theta_ws_beta_minus") %>%
-                e_remove_serie("theta_ws_y_minus") %>%
-                e_remove_serie("theta_vs_kappa_plus") %>%
-                e_remove_serie("theta_ws_b_plus") %>%
-                e_remove_serie("theta_vs_y_minus") %>%
-                e_remove_serie("theta_ws_kappa_minus") %>%
-                e_remove_serie("theta_ws_b_minus") %>%
-                e_remove_serie("theta_vs_a_plus") %>%
-                e_remove_serie("theta_vs_kappa_minus") %>%
-                e_remove_serie("theta_vs_lambda_plus") %>%
-                e_remove_serie("theta_vs_lambda_minus") %>%
+                e_line(theta_vs_y_plus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%
                 e_execute()
         }
-        
-        if(input$param_increase == 'a'){
-            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
-                e_line(theta_vs_a_plus, name = 'Vacancy', lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%  
-                e_remove_serie("theta_ws_y_plus") %>%
-                e_remove_serie("theta_vs_y_plus") %>%
-                e_remove_serie("theta_vs_a_minus") %>%
-                e_remove_serie("theta_ws_beta_plus") %>%
-                e_remove_serie("theta_ws_kappa_plus") %>%
-                e_remove_serie("theta_ws_beta_minus") %>%
-                e_remove_serie("theta_ws_y_minus") %>%
-                e_remove_serie("theta_vs_kappa_plus") %>%
-                e_remove_serie("theta_ws_b_plus") %>%
-                e_remove_serie("theta_vs_y_minus") %>%
-                e_remove_serie("theta_ws_kappa_minus") %>%
-                e_remove_serie("theta_ws_b_minus") %>%
-                e_remove_serie("theta_vs_a_plus") %>%
-                e_remove_serie("theta_vs_kappa_minus") %>%
-                e_remove_serie("theta_vs_lambda_plus") %>%
-                e_remove_serie("theta_vs_lambda_minus") %>%
+
+        if(input$param == 'prod' && input$switch == FALSE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_ws_y_minus, name = "Wage'", lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
+                e_line(theta_vs_y_minus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%
                 e_execute()
         }
-        
-        if(input$param_increase == 'kappa'){
-            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
-                e_line(theta_ws_kappa_plus, name = 'Wage', lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>% 
-                e_line(theta_vs_kappa_plus, name = 'Vacancy', lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>% 
-                e_remove_serie("theta_ws_y_plus") %>%
-                e_remove_serie("theta_vs_y_plus") %>%
-                e_remove_serie("theta_ws_y_minus") %>%
-                e_remove_serie("theta_vs_y_minus") %>%
-                e_remove_serie("theta_vs_a_plus") %>%
-                e_remove_serie("theta_vs_a_minus") %>%
-                e_remove_serie("theta_ws_kappa_minus") %>%
-                e_remove_serie("theta_vs_kappa_minus") %>%
-                e_remove_serie("theta_ws_beta_plus") %>%
-                e_remove_serie("theta_ws_beta_minus") %>%
-                e_remove_serie("theta_ws_b_plus") %>%
-                e_remove_serie("theta_ws_b_minus") %>%
-                e_remove_serie("theta_vs_lambda_plus") %>%
-                e_remove_serie("theta_vs_lambda_minus") %>%
+
+        if(input$param == 'a' && input$switch == TRUE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_vs_a_plus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%
                 e_execute()
         }
-        
-        if(input$param_increase == 'beta'){
-            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
-                e_line(theta_ws_beta_plus, name = 'Wage', lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%  
-                e_remove_serie("theta_ws_y_plus") %>%
-                e_remove_serie("theta_vs_y_plus") %>%
-                e_remove_serie("theta_ws_y_minus") %>%
-                e_remove_serie("theta_vs_y_minus") %>%
-                e_remove_serie("theta_vs_a_plus") %>%
-                e_remove_serie("theta_vs_a_minus") %>%
-                e_remove_serie("theta_ws_kappa_plus") %>%
-                e_remove_serie("theta_vs_kappa_plus") %>%
-                e_remove_serie("theta_ws_kappa_minus") %>%
-                e_remove_serie("theta_vs_kappa_minus") %>%
-                e_remove_serie("theta_ws_beta_plus") %>%
-                e_remove_serie("theta_ws_beta_minus") %>%
-                e_remove_serie("theta_ws_b_minus") %>%
-                e_remove_serie("theta_vs_lambda_plus") %>%
-                e_remove_serie("theta_vs_lambda_minus") %>%
+
+        if(input$param == 'a' && input$switch == FALSE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_vs_a_minus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%
                 e_execute()
         }
-        
-        if(input$param_increase == 'b'){
-            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
-                e_line(theta_ws_b_plus, name = 'Wage', lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
-                e_remove_serie("theta_ws_y_plus") %>%
-                e_remove_serie("theta_vs_y_plus") %>%
-                e_remove_serie("theta_ws_y_minus") %>%
-                e_remove_serie("theta_vs_y_minus") %>%
-                e_remove_serie("theta_vs_a_plus") %>%
-                e_remove_serie("theta_vs_a_minus") %>%
-                e_remove_serie("theta_ws_kappa_plus") %>%
-                e_remove_serie("theta_vs_kappa_plus") %>%
-                e_remove_serie("theta_ws_kappa_minus") %>%
-                e_remove_serie("theta_vs_kappa_minus") %>%
-                e_remove_serie("theta_ws_beta_plus") %>%
-                e_remove_serie("theta_ws_beta_minus") %>%
-                e_remove_serie("theta_ws_b_minus") %>%
-                e_remove_serie("theta_vs_lambda_plus") %>%
-                e_remove_serie("theta_vs_lambda_minus") %>%
+
+        if(input$param == 'kappa' && input$switch == TRUE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_ws_kappa_plus, name = "Wage'", lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
+                e_line(theta_vs_kappa_plus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%
                 e_execute()
         }
-        
-        if(input$param_increase == 'lambda'){
-            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>% 
-                e_line(theta_vs_lambda_plus, name = 'Vacancy', lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>% 
-                e_remove_serie("theta_ws_y_plus") %>%
-                e_remove_serie("theta_vs_y_plus") %>%
-                e_remove_serie("theta_ws_y_minus") %>%
-                e_remove_serie("theta_vs_y_minus") %>%
-                e_remove_serie("theta_vs_a_plus") %>%
-                e_remove_serie("theta_vs_a_minus") %>%
-                e_remove_serie("theta_ws_kappa_plus") %>%
-                e_remove_serie("theta_vs_kappa_plus") %>%
-                e_remove_serie("theta_ws_kappa_minus") %>%
-                e_remove_serie("theta_vs_kappa_minus") %>%
-                e_remove_serie("theta_ws_beta_plus") %>%
-                e_remove_serie("theta_ws_beta_minus") %>%
-                e_remove_serie("theta_ws_b_plus") %>%
-                e_remove_serie("theta_ws_b_minus") %>%
-                e_remove_serie("theta_vs_lambda_minus") %>%
+
+        if(input$param == 'kappa' && input$switch == FALSE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_ws_kappa_minus, name = "Wage'", lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
+                e_line(theta_vs_kappa_minus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%
                 e_execute()
         }
-    })
+
+        if(input$param == 'beta' && input$switch == TRUE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_ws_beta_plus, name = "Wage'", lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
+                e_execute()
+        }
+
+        if(input$param == 'beta' && input$switch == FALSE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_ws_beta_minus, name = "Wage'", lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
+                e_execute()
+        }
+
+        if(input$param == 'b' && input$switch == TRUE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_ws_b_plus, name = "Wage'", lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
+                e_execute()
+        }
+
+        if(input$param == 'b' && input$switch == FALSE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_ws_b_plus, name = "Wage'", lineStyle = list(type = "dashed", color = "#8d89f5"),symbol= 'none') %>%
+                e_execute()
+        }
+
+        if(input$param == 'lambda' && input$switch == TRUE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_vs_lambda_plus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%
+                e_execute()
+        }
+
+        if(input$param == 'lambda' && input$switch == FALSE){
+            echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
+                e_remove_serie("Wage'") %>%
+                e_remove_serie("Vacancy'") %>%
+                e_line(theta_vs_lambda_minus, name = "Vacancy'", lineStyle = list(type = "dashed", color = "#B80000"),symbol= 'none') %>%
+                e_execute()
+        }
+     })
 }
 
 # Run the application 

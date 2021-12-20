@@ -9,7 +9,7 @@ kappa= 0.43 # cost to advertise a job vacancy
 beta= 0.2 # workers' degree of bargaining power in wage negotiations
 lambda= 0.102 # reflects the exogenous separation rate
 a= 0.6 # efficiency of the matching process
-b= 0.71 # the value to the worker of not being employed and reflects, among other things, the amount of unemployment benefits provided by government policy
+b= 0.71 #  unemployment benefits 
 y= 1 # output of the worker
 
 # Initial steady state
