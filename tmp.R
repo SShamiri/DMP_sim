@@ -13,33 +13,48 @@ dat %>% filter(between(u,u_range[1], u_range[2])) %>%
            #axisLine = T,
            axisLabel = list(color = 'white'), 
            nameGap = 25) %>% 
-  # e_mark_line(data = list(xAxis = 0.1, yAxis = 2.4))  %>% 
-  #e_mark_line(data = list(xAxis = 0.1)) %>% 
-  # e_mark_area( color ='red',
-  #   data = list(
-  #     list(xAxis = 0.06, yAxis = 0), 
-  #     list(xAxis = 0.1, yAxis = 2.3)
-  #   )
-  # ) %>% 
   e_mark_p(
     type = "line",
+    #serie_index = 1,
     data = list(
       list(xAxis = 0.1155, yAxis = 1.64256),
       list(xAxis = 0.1155, yAxis = 0,
            value = "Uss")
-    )
+      ),
+      lineStyle = list(type = "solid", color = "red")
    
   ) %>% 
   e_mark_p(
     type = "line",
-    serie_index = 2,
+    serie_index = 1,
     data = list(
       list(xAxis = 0.1155, yAxis = 1.64256),
       list(xAxis = 0.06, yAxis = 1.64256,
            value = "θss")
     ),
-    lineStyle = list(type = "solid")
+    lineStyle = list(type = "solid", color = "gray")
+  ) %>% 
+  e_mark_p(
+    type = "line",
+    serie_index = 2,
+    data = list(
+      list(xAxis = 0.1, yAxis = 4),
+      list(xAxis = 0.1, yAxis = 0,
+           value = "Uss")
+    ),
+    lineStyle = list(type = "solid", color = "blue")
+  ) %>% 
+  e_mark_p(
+    type = "line",
+    serie_index = 2,
+    data = list(
+      list(xAxis = 0.1, yAxis = 4),
+      list(xAxis = 0.06, yAxis = 4,
+           value = "Uss")
+    ),
+    lineStyle = list(type = "solid", color = "blue")
   ) 
+
 
 
 

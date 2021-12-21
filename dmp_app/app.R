@@ -87,7 +87,7 @@ server <- function(input, output) {
             e_line(theta_bc, lineStyle = list(type = "solid", color = "#3D3DDD"),symbol= 'none', name = 'BC') %>%
             e_x_axis(min = 0.06, name = "Unemployment rate", 
                      nameLocation= 'middle', 
-                     axisLabel = list(color = 'white'), 
+                     #axisLabel = list(color = 'white'), 
                      nameGap = 25) %>%
             e_y_axis(max = 6,
                     name = "market tightness (θ)", 
@@ -128,16 +128,164 @@ server <- function(input, output) {
     observeEvent(toListen(), {
         u_range <- c(0.08,0.16)
 
-        if(grepl("ss|kappa|b|beta|y",input$param)){
+        # if(grepl("ss|kappa|b|beta|y",input$param)){
+        #     echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+        #         e_remove_serie("BC'") %>%
+        #         e_execute()
+        # }
+        
+        if(input$param == "ss"){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+                e_remove_serie("BC") %>%
                 e_remove_serie("BC'") %>%
+                e_line(theta_bc, lineStyle = list(type = "solid", color = "#3D3DDD"),symbol= 'none', name = 'BC') %>%
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.1155, yAxis = 1.64256),
+                        list(xAxis = 0.1155, yAxis = 0,
+                             value = "Uss")
+                    ),
+                    lineStyle = list(type = "solid", color = "gray")
+                ) %>% 
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.1155, yAxis = 1.64256),
+                        list(xAxis = 0.06, yAxis = 1.64256,
+                             value = "θss")
+                    ),
+                    lineStyle = list(type = "solid", color = "gray")
+                ) %>% 
+                e_merge() %>% 
                 e_execute()
         }
+        
+        
+        if(input$param == 'prod' && input$switch == TRUE){
+            echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+                e_remove_serie("BC") %>%
+                e_remove_serie("BC'") %>%
+                e_line(theta_bc, lineStyle = list(type = "solid", color = "#3D3DDD"),symbol= 'none', name = 'BC') %>%
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.1155, yAxis = 1.64256),
+                        list(xAxis = 0.1155, yAxis = 0,
+                             value = "Uss")
+                    ),
+                    lineStyle = list(type = "solid", color = "gray")
+                ) %>% 
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.1155, yAxis = 1.64256),
+                        list(xAxis = 0.06, yAxis = 1.64256,
+                             value = "θss")
+                    ),
+                    lineStyle = list(type = "solid", color = "gray")
+                ) %>%
+                #e_merge() %>% 
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.10804, yAxis = 1.96981),
+                        list(xAxis = 0.10804, yAxis = 0,
+                             value = "Uss'")
+                    ),
+                    lineStyle = list(type = "dashed", color = "blue")
+                ) %>% 
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.10804, yAxis = 1.96981),
+                        list(xAxis = 0.06, yAxis = 1.96981,
+                             value = "θss'")
+                    ),
+                    lineStyle = list(type = "dashed", color = "blue")
+                ) %>% 
+                #e_merge() %>% 
+                e_execute()
+        } 
+        
+        if(input$param == 'prod' && input$switch == FALSE){
+            echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
+                e_remove_serie("BC") %>%
+                e_remove_serie("BC'") %>%
+                e_line(theta_bc, lineStyle = list(type = "solid", color = "#3D3DDD"),symbol= 'none', name = 'BC') %>%
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.1155, yAxis = 1.64256),
+                        list(xAxis = 0.1155, yAxis = 0,
+                             value = "Uss")
+                    ),
+                    lineStyle = list(type = "solid", color = "gray")
+                ) %>% 
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.1155, yAxis = 1.64256),
+                        list(xAxis = 0.06, yAxis = 1.64256,
+                             value = "θss")
+                    ),
+                    lineStyle = list(type = "solid", color = "gray")
+                ) %>%
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.13093, yAxis = 1.27338),
+                        list(xAxis = 0.13093, yAxis = 0,
+                             value = "Uss")
+                    ),
+                    lineStyle = list(type = "dashed", color = "gray")
+                ) %>% 
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.13093, yAxis = 1.27338),
+                        list(xAxis = 0.06, yAxis = 1.27338,
+                             value = "θss")
+                    ),
+                    lineStyle = list(type = "dashed", color = "gray")
+                ) %>% 
+                e_merge() %>% 
+                e_execute()
+        } 
 
         if(input$param == 'a' && input$switch == TRUE){
             echarts4rProxy("bc_plot", data = dat %>% filter(between(u,u_range[1], u_range[2])), x = u_bc) %>%
                 e_line(theta_bc_a_plus, lineStyle = list(type = "dashed", color = "#3D3DDD"),symbol= 'none', name = "BC'") %>%
                 e_remove_serie("BC'") %>%
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis = 0.08604, yAxis = 1.83427),
+                        list(xAxis = 0.08604, yAxis = 0,
+                             value = "Uss")
+                    ),
+                    lineStyle = list(type = "dashed", color = "#3D3DDD")
+                ) %>% 
+                e_mark_p(
+                    type = "line",
+                    serie_index = 1,
+                    data = list(
+                        list(xAxis =  0.08604, yAxis = 1.83427),
+                        list(xAxis = 0.06, yAxis = 1.83427,
+                             value = "θss")
+                    )
+                ) %>% 
                 e_execute()
         }
 
@@ -208,12 +356,6 @@ server <- function(input, output) {
                 e_execute()
         }
 
-        # if(input$param == 'ss' && input$switch == FALSE ){
-        #     echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
-        #         e_remove_serie("Wage'") %>%
-        #         e_remove_serie("Vacancy'") %>%
-        #         e_execute()
-        # }
 
         if(input$param == 'prod' && input$switch == TRUE){
             echarts4rProxy("ws_vs_plot", data = dat %>% filter(between(w,w_range[1], w_range[2])), x = w) %>%
